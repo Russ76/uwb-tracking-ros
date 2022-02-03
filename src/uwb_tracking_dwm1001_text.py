@@ -40,7 +40,8 @@ class dwm1001_localizer:
         self.kalman_list = [] 
 
         self.multipleTags = MultiTags()
-        
+        self.pub_tags = rospy.Publisher("/dwm1001/multiTags", MultiTags, queue_size=100) 
+         
         # Serial port settings
         # self.dwm_port = rospy.get_param('~port')
         # self.verbose = rospy.get_param('~verbose', True)
@@ -61,7 +62,7 @@ class dwm1001_localizer:
         # open serial port
         # self.serialPortDWM1001.open()
         # opening a text file
-        file1 = open("/home/russ/save_active_input.txt", "r")
+        file1 = open("/home/russ/save_passive_input.txt", "r")
         time.sleep(1)
 
         # check if the serial port is opened
@@ -214,13 +215,15 @@ class dwm1001_localizer:
                 pass
             else:
                 self.topics[tag_id].publish(ps) 
+                # self.multipleTags.TagsList[int(tag_id)]= 1 # this was "tag"
+            self.pub_tags.publish(self.multipleTags)    
         
         # If plugged into passive listener unit:
         elif "POS" in ser_pose_data[0] :
             #rospy.loginfo(ser_pose_data)  # just for debug
 
-            tag_id = str(ser_pose_data[1], 'UTF8')  # IDs in 0 - 15
-            tag_macID = str(ser_pose_data[2], 'UTF8')
+            tag_id = str(ser_pose_data[1])  # IDs in 0 - 15
+            tag_macID = str(ser_pose_data[2])
 
             ps = PoseStamped()
             ps.pose.position.x = float(ser_pose_data[3])
